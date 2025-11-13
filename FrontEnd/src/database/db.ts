@@ -140,16 +140,17 @@ export class AppDatabase extends Dexie {
   settings!: Table<AppSettings>;
 
   constructor() {
-    super('NepalBillingDB');
+    super('NepalBillingSystemV3');  // Changed to V3 for fresh start
     
+    // SIMPLE INDEXES - no boolean fields!
     this.version(1).stores({
       business: '++id',
-      products: '++id, name, barcode, category, isActive',
-      customers: '++id, name, phone, isActive',
-      sales: '++id, invoiceNumber, customerId, saleDate, paymentStatus',
+      products: '++id, name, category',  // Removed isActive and barcode from index
+      customers: '++id, name, phone',    // Removed isActive from index
+      sales: '++id, invoiceNumber, customerId, saleDate',
       saleItems: '++id, saleId, productId',
-      inventoryTransactions: '++id, productId, transactionType, transactionDate',
-      syncQueue: '++id, entityType, entityId, createdAt',
+      inventoryTransactions: '++id, productId, transactionType',
+      syncQueue: '++id, entityType, entityId',
       settings: '++id, key'
     });
   }
@@ -163,6 +164,8 @@ export const db = new AppDatabase();
 
 export async function initializeDatabase() {
   try {
+    console.log('🔄 Initializing database...');
+    
     const businessCount = await db.business.count();
     
     if (businessCount === 0) {
@@ -175,6 +178,7 @@ export async function initializeDatabase() {
         createdAt: new Date(),
         updatedAt: new Date()
       });
+      console.log('✅ Default business created');
     }
 
     const settingsCount = await db.settings.count();
@@ -188,13 +192,14 @@ export async function initializeDatabase() {
         { key: 'invoicePrefix', value: 'INV', updatedAt: new Date() },
         { key: 'lastInvoiceNumber', value: '0', updatedAt: new Date() }
       ]);
+      console.log('✅ Default settings created');
     }
 
     console.log('✅ Database initialized successfully');
     return true;
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
-    return false;
+    throw error;
   }
 }
 
