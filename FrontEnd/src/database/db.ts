@@ -140,13 +140,13 @@ export class AppDatabase extends Dexie {
   settings!: Table<AppSettings>;
 
   constructor() {
-    super('NepalBillingSystemV3');  // Changed to V3 for fresh start
+    // CHANGED NAME TO FORCE NEW DATABASE
+    super('NepalBillingFinal');
     
-    // SIMPLE INDEXES - no boolean fields!
     this.version(1).stores({
       business: '++id',
-      products: '++id, name, category',  // Removed isActive and barcode from index
-      customers: '++id, name, phone',    // Removed isActive from index
+      products: '++id, name, category',
+      customers: '++id, name, phone',
       sales: '++id, invoiceNumber, customerId, saleDate',
       saleItems: '++id, saleId, productId',
       inventoryTransactions: '++id, productId, transactionType',
